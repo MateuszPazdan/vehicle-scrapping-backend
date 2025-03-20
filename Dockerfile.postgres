@@ -1,0 +1,10 @@
+# Use official PostgreSQL image
+FROM postgres:latest
+
+# Set environment variables used in prisma service
+ENV POSTGRES_DB = vehicle_scrapping_db
+ENV POSTGRES_USER = db_admin
+ENV POSTGRES_PASSWORD = coi2Luh5G49MERvHZr9YzrVfei1mmWrDg5IOzFKivCCIoA0YkvL7TT9isL9dQuIX
+
+# Expose the PostgreSQL port
+EXPOSE 5432
