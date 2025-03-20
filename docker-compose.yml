@@ -5,15 +5,15 @@ services:
       - .env
     ports:
       - '5432:5432'
-  vehicle_scrapping_api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - '8000:8000'
-    depends_on:
-      - vehicle-scrapping-db
-    env_file:
-      - .env
-    volumes:
-      - ./src:/usr/src/app/src
+  # vehicle_scrapping_api:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - '8000:8000'
+  #   depends_on:
+  #     - vehicle-scrapping-db
+  #   env_file:
+  #     - .env
+  #   volumes:
+  #     - ./src:/usr/src/app/src

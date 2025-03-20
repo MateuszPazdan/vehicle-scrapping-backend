@@ -8,17 +8,76 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator erd {
+  provider = "prisma-erd-generator"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id              Int       @id @default(autoincrement())
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  email           String    @unique
-  hashedPassword  String
-  isAdmin         Boolean   @default(false)
+  id             Int      @id @default(autoincrement())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  email          String   @unique
+  hashedPassword String
+  isAdmin        Boolean  @default(false)
 }
 
+model Vehicle {
+  id             Int            @id @default(autoincrement())
+  vin            String         @unique
+  registrationNr String         @unique
+  owners         OwnerVehicle[]
+  status         VehicleStatus
+  receivedAt     DateTime
+  dismantledAt   DateTime?
+  wasteEntries   WasteEntry[]
+}
+
+model Owner {
+  id       Int            @id @default(autoincrement())
+  name     String
+  vehicles OwnerVehicle[]
+}
+
+model OwnerVehicle {
+  ownerId   Int
+  vehicleId Int
+  owner     Owner   @relation(fields: [ownerId], references: [id])
+  vehicle   Vehicle @relation(fields: [vehicleId], references: [id])
+
+  @@id([ownerId, vehicleId])
+}
+
+model WasteEntry {
+  id          Int       @id @default(autoincrement())
+  vehicle     Vehicle   @relation(fields: [vehicleId], references: [id])
+  vehicleId   Int
+  wasteType   WasteType @relation(fields: [wasteTypeId], references: [id])
+  wasteTypeId Int
+  weight      Float
+}
+
+model WasteType {
+  id                Int             @id @default(autoincrement())
+  name              String          @unique
+  pricePerKg        Float
+  storageLocation   StorageLocation @relation(fields: [storageLocationId], references: [id])
+  storageLocationId Int             @unique
+  WasteEntry        WasteEntry[]
+}
+
+model StorageLocation {
+  id          Int        @id @default(autoincrement())
+  locationNr  String     @unique
+  currentMass Float
+  wasteType   WasteType?
+}
+
+enum VehicleStatus {
+  DISMANTLED
+  RECEIVED_FOR_DISMANTLING
+}

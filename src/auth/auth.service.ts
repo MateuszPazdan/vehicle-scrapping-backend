@@ -34,6 +34,8 @@ export class AuthService {
   }
 
   async register(dto: AuthDto) {
+    if (dto.adminKey !== process.env.ADMIN_KEY)
+      throw new UnauthorizedException();
     const hashedPassword = await this.hashData(dto.password);
     await this.prisma.user.create({
       data: {
