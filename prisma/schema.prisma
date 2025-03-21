@@ -43,10 +43,10 @@ model Vehicle {
   year_of_production              Int
   vin                             String                  @unique
   registration_number             String                  @unique
-  registration_certificate_number String
+  registration_certificate_number String                  @unique
   weight                          Float
   owners                          Owner[]
-  status                          VehicleStatus
+  status                          VehicleStatus           @default(RECEIVED_FOR_DISMANTLING)
   receivedAt                      DateTime                @default(now())
   dismantledAt                    DateTime?
   wasteEntries                    WasteEntry[]
@@ -55,7 +55,7 @@ model Vehicle {
 
 model DismantlingCertificate {
   id                Int     @id @default(autoincrement())
-  certificateNumber Int
+  certificateNumber Int     @unique
   fileLink          String
   vehicle           Vehicle @relation(fields: [vehicleId], references: [id])
   vehicleId         Int     @unique
@@ -68,6 +68,7 @@ model WasteEntry {
   wasteType   WasteType @relation(fields: [wasteTypeId], references: [id])
   wasteTypeId Int
   weight      Float
+  createdAt   DateTime  @default(now())
 }
 
 model WasteType {
