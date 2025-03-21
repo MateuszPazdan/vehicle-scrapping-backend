@@ -26,39 +26,39 @@ model User {
   isAdmin        Boolean  @default(false)
 }
 
+model Owner {
+  id        Int       @id @default(autoincrement())
+  name      String
+  surname   String
+  pesel     String    @unique
+  address   String
+  id_number String    @unique
+  vehicles  Vehicle[]
+}
+
 model Vehicle {
-  id                              Int            @id @default(autoincrement())
+  id                              Int                     @id @default(autoincrement())
   brand                           String
   model                           String
   year_of_production              Int
-  vin                             String         @unique
-  registration_number             String         @unique
+  vin                             String                  @unique
+  registration_number             String                  @unique
   registration_certificate_number String
   weight                          Float
-  owners                          OwnerVehicle[]
+  owners                          Owner[]
   status                          VehicleStatus
-  receivedAt                      DateTime       @default(now())
+  receivedAt                      DateTime                @default(now())
   dismantledAt                    DateTime?
   wasteEntries                    WasteEntry[]
+  DismantlingCertificate          DismantlingCertificate?
 }
 
-model Owner {
-  id        Int            @id @default(autoincrement())
-  name      String
-  surname   String
-  pesel     String         @unique
-  address   String
-  id_number String         @unique
-  vehicles  OwnerVehicle[]
-}
-
-model OwnerVehicle {
-  ownerId   Int
-  vehicleId Int
-  owner     Owner   @relation(fields: [ownerId], references: [id])
-  vehicle   Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
-
-  @@id([ownerId, vehicleId])
+model DismantlingCertificate {
+  id                Int     @id @default(autoincrement())
+  certificateNumber Int
+  fileLink          String
+  vehicle           Vehicle @relation(fields: [vehicleId], references: [id])
+  vehicleId         Int     @unique
 }
 
 model WasteEntry {
@@ -71,19 +71,19 @@ model WasteEntry {
 }
 
 model WasteType {
-  id                Int             @id @default(autoincrement())
-  name              String          @unique
-  pricePerKg        Float
-  storageLocation   StorageLocation @relation(fields: [storageLocationId], references: [id])
-  storageLocationId Int             @unique
-  WasteEntry        WasteEntry[]
+  id              Int               @id @default(autoincrement())
+  name            String            @unique
+  pricePerKg      Float
+  storageLocation StorageLocation[]
+  WasteEntry      WasteEntry[]
 }
 
 model StorageLocation {
-  id          Int        @id @default(autoincrement())
-  locationNr  String     @unique
+  id          Int       @id @default(autoincrement())
+  locationNr  String    @unique
   currentMass Float
-  wasteType   WasteType?
+  wasteType   WasteType @relation(fields: [wasteTypeId], references: [id])
+  wasteTypeId Int
 }
 
 enum VehicleStatus {
