@@ -25,5 +25,5 @@ export class CreateOwnerDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  Id_number: string;
+  id_number: string;
 }
