@@ -27,3 +27,26 @@ export class CreateOwnerDto {
   @IsNotEmpty()
   id_number: string;
 }
+
+export class updateOwnerDto {
+  @ApiProperty()
+  @IsString()
+  name: string;
+
+  @ApiProperty()
+  @IsString()
+  surname: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  pesel: string;
+
+  @ApiProperty()
+  @IsString()
+  address: string;
+
+  @ApiProperty()
+  @IsString()
+  id_number: string;
+}

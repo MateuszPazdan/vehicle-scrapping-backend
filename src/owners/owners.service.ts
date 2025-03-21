@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateOwnerDto } from './dto/owners.dto';
+import { CreateOwnerDto, updateOwnerDto } from './dto/owners.dto';
 
 @Injectable()
 export class OwnersService {
@@ -41,6 +41,31 @@ export class OwnersService {
         id_number: createOwnerDto.id_number,
       },
     });
+  }
+
+  async updateOwner(updateOwnerDto: updateOwnerDto) {
+    const existingPesel = await this.prisma.owner.findUnique({
+      where: { pesel: updateOwnerDto.pesel },
+    });
+    if (!existingPesel) {
+      throw new ConflictException('Kontrahent z takim peselem nie istnieje.');
+    }
+
+    await this.prisma.owner.update({
+      where: {
+        pesel: updateOwnerDto.pesel,
+      },
+      data: {
+        name: updateOwnerDto.name,
+        surname: updateOwnerDto.surname,
+        address: updateOwnerDto.address,
+        id_number: updateOwnerDto.id_number,
+      },
+    });
+    return {
+      where: { pesel: updateOwnerDto.pesel },
+      create: {}, // Pusty obiekt, bo nie tworzymy właściciela, tylko go aktualizujemy
+    };
   }
 
   async getAllOwners() {
