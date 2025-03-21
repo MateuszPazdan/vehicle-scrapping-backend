@@ -8,26 +8,22 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: 'http://localhost:3000', // 🚀 Zmień '*' na dokładny adres frontendowy
-    credentials: true, // ✅ Zezwól na ciasteczka
+    origin: 'http://localhost:3000',
+    credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: 'Content-Type, Authorization',
   });
-  
 
   app.setGlobalPrefix('/api');
-
   app.useGlobalPipes(new ValidationPipe());
-
   app.use(cookieParser());
 
   const config = new DocumentBuilder()
-    .setTitle('Piast API')
-    .setDescription('API for piastropczyce site')
+    .setTitle('Vehicle Scrapping API')
     .setVersion('1.0')
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('/api/swagger', app, documentFactory);
+  SwaggerModule.setup('/docs', app, documentFactory);
 
   await app.listen(process.env.PORT ?? 8000);
 }

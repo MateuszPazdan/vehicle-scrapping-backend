@@ -38,9 +38,13 @@ model Vehicle {
 }
 
 model Owner {
-  id       Int            @id @default(autoincrement())
-  name     String
-  vehicles OwnerVehicle[]
+  id        Int            @id @default(autoincrement())
+  name      String
+  surname   String
+  pesel     String         @unique
+  address   String
+  id_number String         @unique
+  vehicles  OwnerVehicle[]
 }
 
 model OwnerVehicle {
