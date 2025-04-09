@@ -73,21 +73,33 @@ model WasteEntry {
   storageLocationId Int
 }
 
+model WasteTransaction {
+  id                Int             @id @default(autoincrement())
+  weight            Float
+  transactionDate   DateTime        @default(now())
+  wasteType         WasteType       @relation(fields: [wasteTypeId], references: [id])
+  wasteTypeId       Int
+  storageLocation   StorageLocation @relation(fields: [storageLocationId], references: [id])
+  storageLocationId Int
+}
+
 model WasteType {
-  id              Int               @id @default(autoincrement())
-  name            String            @unique
-  pricePerKg      Float
-  storageLocation StorageLocation[]
-  WasteEntry      WasteEntry[]
+  id               Int                @id @default(autoincrement())
+  name             String             @unique
+  pricePerKg       Float
+  storageLocation  StorageLocation[]
+  WasteEntry       WasteEntry[]
+  WasteTransaction WasteTransaction[]
 }
 
 model StorageLocation {
-  id          Int          @id @default(autoincrement())
-  locationNr  String       @unique
-  currentMass Float
-  wasteType   WasteType    @relation(fields: [wasteTypeId], references: [id])
-  wasteTypeId Int
-  WasteEntry  WasteEntry[]
+  id               Int                @id @default(autoincrement())
+  locationNr       String             @unique
+  currentMass      Float
+  wasteType        WasteType          @relation(fields: [wasteTypeId], references: [id])
+  wasteTypeId      Int
+  WasteEntry       WasteEntry[]
+  WasteTransaction WasteTransaction[]
 }
 
 enum VehicleStatus {
