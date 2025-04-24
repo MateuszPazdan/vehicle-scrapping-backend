@@ -23,7 +23,7 @@ export class OwnersController {
   @UseGuards(JwtAuthGuard)
   @ApiResponse({
     status: 201,
-    description: 'Creates a new owner',
+    description: 'Return a new owner',
     type: OwnerResponseDto,
   })
   async createOwner(@Body() createOwnerDto: CreateOwnerDto): Promise<OwnerResponseDto> {

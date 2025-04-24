@@ -15,6 +15,7 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 import { User } from '@prisma/client';
 import { Response } from 'express';
 import { CurrentUser } from './current-user.decorator';
+import { ApiResponse } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
@@ -22,6 +23,10 @@ export class AuthController {
 
   @Post('/register')
   @HttpCode(HttpStatus.CREATED)
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'User successfully registered.',
+  })
   async register(@Body() dto: AuthDto) {
     return this.authService.register(dto);
   }
@@ -29,6 +34,14 @@ export class AuthController {
   @Post('/login')
   @UseGuards(LocalAuthGuard)
   @HttpCode(HttpStatus.OK)
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'User successfully logged in.',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid credentials.',
+  })
   login(
     @Body() dto: LoginDto,
     @CurrentUser() user: User,
@@ -40,6 +53,14 @@ export class AuthController {
   @Post('/verify')
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'JWT token successfully verified.',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Unauthorized access, invalid or expired token.',
+  })
   verifyToken() {
     this.authService.verifyToken();
   }
@@ -47,6 +68,10 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt'))
   @Post('/logout')
   @HttpCode(HttpStatus.OK)
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'User successfully logged out.',
+  })
   logout(@Res({ passthrough: true }) response: Response) {
     this.authService.logout(response);
   }
