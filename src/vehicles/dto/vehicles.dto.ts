@@ -31,6 +31,10 @@ export class AddVehicleToDismantlingDto {
   @IsNotEmpty()
   @IsNumber()
   weight: number;
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsNumber()
+  price: number;
   @ApiProperty({ type: () => CreateOwnerDto, isArray: true })
   @IsNotEmpty()
   owners: CreateOwnerDto[];

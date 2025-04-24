@@ -28,7 +28,7 @@ export class CreateOwnerDto {
   id_number: string;
 }
 
-export class updateOwnerDto {
+export class UpdateOwnerDto {
   @ApiProperty()
   @IsString()
   name: string;

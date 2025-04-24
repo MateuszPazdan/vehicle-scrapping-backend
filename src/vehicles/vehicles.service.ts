@@ -40,6 +40,7 @@ export class VehiclesService {
         vin: addVehicleToDismantlingDto.vin,
         weight: addVehicleToDismantlingDto.weight,
         year_of_production: addVehicleToDismantlingDto.year_of_production,
+        price: addVehicleToDismantlingDto.price,
         owners: {
           connectOrCreate: addVehicleToDismantlingDto.owners.map((owner) => ({
             where: { pesel: owner.pesel },

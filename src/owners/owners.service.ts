@@ -5,13 +5,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateOwnerDto, updateOwnerDto } from './dto/owners.dto';
+import { CreateOwnerDto, UpdateOwnerDto } from './dto/owners.dto';
+import { OwnerResponseDto } from './dto/owners.response.dto';
 
 @Injectable()
 export class OwnersService {
   constructor(private prisma: PrismaService) {}
 
-  async createOwner(createOwnerDto: CreateOwnerDto) {
+  async createOwner(createOwnerDto: CreateOwnerDto): Promise<OwnerResponseDto>  {
     if (!/^\d{11}$/.test(createOwnerDto.pesel)) {
       throw new BadRequestException(
         'Niepoprawny format peselu. Musi składać się z 11 znaków',
@@ -43,7 +44,7 @@ export class OwnersService {
     });
   }
 
-  async updateOwner(updateOwnerDto: updateOwnerDto) {
+  async updateOwner(updateOwnerDto: UpdateOwnerDto) {
     const existingPesel = await this.prisma.owner.findUnique({
       where: { pesel: updateOwnerDto.pesel },
     });
@@ -64,15 +65,15 @@ export class OwnersService {
     });
     return {
       where: { pesel: updateOwnerDto.pesel },
-      create: {}, // Pusty obiekt, bo nie tworzymy właściciela, tylko go aktualizujemy
+      create: {},
     };
   }
 
-  async getAllOwners() {
+  async getAllOwners(): Promise<OwnerResponseDto[]> {
     return await this.prisma.owner.findMany();
   }
 
-  async getOwner(id: number) {
+  async getOwner(id: number): Promise<OwnerResponseDto> {
     const user = await this.prisma.owner.findUnique({
       where: {
         id,
