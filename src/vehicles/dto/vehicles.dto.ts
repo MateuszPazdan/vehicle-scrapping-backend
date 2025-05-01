@@ -39,3 +39,20 @@ export class AddVehicleToDismantlingDto {
   @IsNotEmpty()
   owners: CreateOwnerDto[];
 }
+
+export class GetAllVehiclesWithFiltersDto {
+  @ApiProperty({ required: false })
+  brand?: string;
+
+  @ApiProperty({ required: false })
+  model?: string;
+
+  @ApiProperty({ required: false })
+  year_of_production?: string;
+
+  @ApiProperty({ required: false })
+  registration_number?: string;
+
+  @ApiProperty({ required: false })
+  vin?: string;
+}

@@ -4,10 +4,11 @@ import {
   Get,
   HttpCode,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { VehiclesService } from './vehicles.service';
-import { AddVehicleToDismantlingDto } from './dto/vehicles.dto';
+import { AddVehicleToDismantlingDto, GetAllVehiclesWithFiltersDto } from './dto/vehicles.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('vehicles')
@@ -27,7 +28,10 @@ export class VehiclesController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  async getAllVehicles() {
-    return await this.vehiclesService.getAllVehicles();
+  async getAllVehiclesWithFilters(
+    @Query()
+    params: GetAllVehiclesWithFiltersDto,
+  ) {
+    return await this.vehiclesService.getAllVehiclesWithFilters(params);
   }
 }

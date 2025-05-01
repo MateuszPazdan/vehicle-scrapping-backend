@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { AddVehicleToDismantlingDto } from './dto/vehicles.dto';
+import {
+  AddVehicleToDismantlingDto,
+  GetAllVehiclesWithFiltersDto,
+} from './dto/vehicles.dto';
 
 @Injectable()
 export class VehiclesService {
@@ -57,7 +60,17 @@ export class VehiclesService {
     });
   }
 
-  async getAllVehicles() {
-    return await this.prisma.vehicle.findMany();
+  async getAllVehiclesWithFilters(params: GetAllVehiclesWithFiltersDto) {
+    const { brand, model, registration_number, vin, year_of_production } =
+      params;
+    return await this.prisma.vehicle.findMany({
+      where: {
+        brand,
+        model,
+        registration_number,
+        vin,
+        year_of_production: Number(year_of_production) || undefined,
+      },
+    });
   }
 }
