@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import {
   AddVehicleToDismantlingDto,
   GetAllVehiclesWithFiltersDto,
+  GetFilterInfoDto,
 } from './dto/vehicles.dto';
 
 @Injectable()
@@ -61,19 +62,62 @@ export class VehiclesService {
   }
 
   async getAllVehiclesWithFilters(params: GetAllVehiclesWithFiltersDto) {
-    const { brand, model, registration_number, vin, year_of_production } = params;
-  
+    const { brand, model, registration_number, vin, year_of_production } =
+      params;
+
     return await this.prisma.vehicle.findMany({
       where: {
-      ...(brand && { brand: { contains: brand, mode: 'insensitive' } }),
-      ...(model && { model: { contains: model, mode: 'insensitive' } }),
-      ...(registration_number && { registration_number: { contains: registration_number, mode: 'insensitive' } }),
-      ...(vin && { vin: { contains: vin, mode: 'insensitive' } }),
-      ...(year_of_production && {
-        year_of_production: Number(year_of_production),
-      }),
+        ...(brand && { brand: { contains: brand, mode: 'insensitive' } }),
+        ...(model && { model: { contains: model, mode: 'insensitive' } }),
+        ...(registration_number && {
+          registration_number: {
+            contains: registration_number,
+            mode: 'insensitive',
+          },
+        }),
+        ...(vin && { vin: { contains: vin, mode: 'insensitive' } }),
+        ...(year_of_production && {
+          year_of_production: Number(year_of_production),
+        }),
       },
     });
   }
-  
+
+  async getFilterInfo(filterInfo?: GetFilterInfoDto) {
+    const brands = await this.prisma.vehicle.findMany({
+      select: {
+        brand: true,
+      },
+      distinct: ['brand'],
+    });
+
+    if (filterInfo?.brand !== '') {
+      const filteredModels = await this.prisma.vehicle.findMany({
+        where: {
+          brand: { equals: filterInfo?.brand },
+        },
+        select: {
+          model: true,
+        },
+        distinct: ['model'],
+      });
+
+      return {
+        brands: brands.map((b) => b.brand),
+        models: filteredModels.map((m) => m.model),
+      };
+    }
+
+    const models = await this.prisma.vehicle.findMany({
+      select: {
+        model: true,
+      },
+      distinct: ['model'],
+    });
+
+    return {
+      brands: brands.map((b) => b.brand),
+      models: models.map((m) => m.model),
+    };
+  }
 }

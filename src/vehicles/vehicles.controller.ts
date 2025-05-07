@@ -8,7 +8,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { VehiclesService } from './vehicles.service';
-import { AddVehicleToDismantlingDto, GetAllVehiclesWithFiltersDto } from './dto/vehicles.dto';
+import {
+  AddVehicleToDismantlingDto,
+  GetAllVehiclesWithFiltersDto,
+  GetFilterInfoDto,
+} from './dto/vehicles.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('vehicles')
@@ -33,5 +37,11 @@ export class VehiclesController {
     params: GetAllVehiclesWithFiltersDto,
   ) {
     return await this.vehiclesService.getAllVehiclesWithFilters(params);
+  }
+
+  @Get('filter_input')
+  @UseGuards(JwtAuthGuard)
+  async getFilterInput(@Query() filterInfo?: GetFilterInfoDto) {
+    return await this.vehiclesService.getFilterInfo(filterInfo);
   }
 }

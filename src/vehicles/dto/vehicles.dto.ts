@@ -56,3 +56,8 @@ export class GetAllVehiclesWithFiltersDto {
   @ApiProperty({ required: false })
   vin?: string;
 }
+
+export class GetFilterInfoDto {
+  @ApiProperty({ required: false })
+  brand?: string;
+}
