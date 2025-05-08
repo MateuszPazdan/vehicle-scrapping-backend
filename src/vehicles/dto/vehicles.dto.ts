@@ -1,6 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { CreateOwnerDto } from 'src/owners/dto/owners.dto';
+import {
+  ArrayNotEmpty,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  Matches,
+} from 'class-validator';
 
 export class AddVehicleToDismantlingDto {
   @ApiProperty()
@@ -35,9 +40,14 @@ export class AddVehicleToDismantlingDto {
   @IsNotEmpty()
   @IsNumber()
   price: number;
-  @ApiProperty({ type: () => CreateOwnerDto, isArray: true })
+  @ApiProperty({ type: String, isArray: true })
+  @ArrayNotEmpty()
+  @Matches(/^\d{11}$/, {
+    each: true,
+    message: 'Each owner must be a valid 11-digit PESEL number',
+  })
   @IsNotEmpty()
-  owners: CreateOwnerDto[];
+  owners: string[];
 }
 
 export class GetAllVehiclesWithFiltersDto {

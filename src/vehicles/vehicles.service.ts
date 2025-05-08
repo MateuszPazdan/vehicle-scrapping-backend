@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
   AddVehicleToDismantlingDto,
@@ -18,9 +18,23 @@ export class VehiclesService {
         vin: addVehicleToDismantlingDto.vin,
       },
     });
-
     if (existingVehicleByVin)
-      throw new Error('Pojazd z takim numerem VIN już istnieje.');
+      throw new ConflictException(
+        'Pojazd z takim numerem VIN jest już w systemie.',
+      );
+
+    const existingVehicleByRegistrationCertificateNumber =
+      await this.prisma.vehicle.findUnique({
+        where: {
+          registration_certificate_number:
+            addVehicleToDismantlingDto.registration_certificate_number,
+        },
+      });
+
+    if (existingVehicleByRegistrationCertificateNumber)
+      throw new ConflictException(
+        'Pojazd z takim numerem dowodu rejestracyjnego już istnieje.',
+      );
 
     const existingVehicleByRegistrationNumber =
       await this.prisma.vehicle.findUnique({
@@ -30,10 +44,29 @@ export class VehiclesService {
       });
 
     if (existingVehicleByRegistrationNumber)
-      throw new Error(
-        'Pojazd z takim numerem dowodu rejestracyjnego już istnieje.',
+      throw new ConflictException(
+        'Pojazd z takim numerem rejestracyjnym już istnieje.',
       );
 
+    const existingPesels = await this.prisma.owner.findMany({
+      where: {
+        pesel: {
+          in: addVehicleToDismantlingDto.owners,
+        },
+      },
+      select: { pesel: true },
+    });
+    const existingPeselValues = existingPesels.map((owner) => owner.pesel);
+
+    const missingPesels = addVehicleToDismantlingDto.owners.filter(
+      (pesel) => !existingPeselValues.includes(pesel),
+    );
+
+    if (missingPesels.length > 0) {
+      throw new ConflictException(
+        `Kontrahenci o podanych numerach PESEL nie istnieją w systemie: ${missingPesels.join(', ')}.`,
+      );
+    }
     return await this.prisma.vehicle.create({
       data: {
         brand: addVehicleToDismantlingDto.brand,
@@ -46,15 +79,8 @@ export class VehiclesService {
         year_of_production: addVehicleToDismantlingDto.year_of_production,
         price: addVehicleToDismantlingDto.price,
         owners: {
-          connectOrCreate: addVehicleToDismantlingDto.owners.map((owner) => ({
-            where: { pesel: owner.pesel },
-            create: {
-              name: owner.name,
-              surname: owner.surname,
-              pesel: owner.pesel,
-              address: owner.address,
-              id_number: owner.id_number,
-            },
+          connect: addVehicleToDismantlingDto.owners.map((pesel) => ({
+            pesel: pesel,
           })),
         },
       },
