@@ -50,3 +50,20 @@ export class UpdateOwnerDto {
   @IsString()
   id_number: string;
 }
+
+export class GetOwnersWithFiltersDto {
+  @ApiProperty({ required: false })
+  name?: string;
+
+  @ApiProperty({ required: false })
+  surname?: string;
+
+  @ApiProperty({ required: false })
+  pesel?: string;
+
+  @ApiProperty({ required: false })
+  address?: string;
+
+  @ApiProperty({ required: false })
+  id_number?: string;
+}

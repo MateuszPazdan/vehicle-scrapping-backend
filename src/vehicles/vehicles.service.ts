@@ -62,8 +62,15 @@ export class VehiclesService {
   }
 
   async getAllVehiclesWithFilters(params: GetAllVehiclesWithFiltersDto) {
-    const { brand, model, registration_number, vin, year_of_production } =
-      params;
+    const {
+      brand,
+      model,
+      registration_number,
+      vin,
+      year_of_production,
+      vehicle_status,
+      owner_pesel,
+    } = params;
 
     return await this.prisma.vehicle.findMany({
       where: {
@@ -78,6 +85,16 @@ export class VehiclesService {
         ...(vin && { vin: { contains: vin, mode: 'insensitive' } }),
         ...(year_of_production && {
           year_of_production: Number(year_of_production),
+        }),
+        ...(vehicle_status && {
+          status: vehicle_status,
+        }),
+        ...(owner_pesel && {
+          owners: {
+            some: {
+              pesel: { contains: owner_pesel, mode: 'insensitive' },
+            },
+          },
         }),
       },
     });

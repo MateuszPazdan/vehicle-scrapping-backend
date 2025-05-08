@@ -5,11 +5,12 @@ import {
   HttpCode,
   Param,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { OwnersService } from './owners.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { CreateOwnerDto } from './dto/owners.dto';
+import { CreateOwnerDto, GetOwnersWithFiltersDto } from './dto/owners.dto';
 import { OwnerResponseDto } from './dto/owners.response.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 
@@ -26,7 +27,9 @@ export class OwnersController {
     description: 'Return a new owner',
     type: OwnerResponseDto,
   })
-  async createOwner(@Body() createOwnerDto: CreateOwnerDto): Promise<OwnerResponseDto> {
+  async createOwner(
+    @Body() createOwnerDto: CreateOwnerDto,
+  ): Promise<OwnerResponseDto> {
     return await this.ownerService.createOwner(createOwnerDto);
   }
 
@@ -34,12 +37,14 @@ export class OwnersController {
   @UseGuards(JwtAuthGuard)
   @ApiResponse({
     status: 200,
-    description: 'Return a list of all owners',
+    description: 'Return a list of owners with filters',
     type: OwnerResponseDto,
     isArray: true,
   })
-  async findAllOwners(): Promise<OwnerResponseDto[]> {
-    return await this.ownerService.getAllOwners();
+  async findAllOwners(
+    @Query() params: GetOwnersWithFiltersDto,
+  ): Promise<OwnerResponseDto[]> {
+    return await this.ownerService.getOwners(params);
   }
 
   @Get(':id')

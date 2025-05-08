@@ -5,14 +5,18 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateOwnerDto, UpdateOwnerDto } from './dto/owners.dto';
+import {
+  CreateOwnerDto,
+  GetOwnersWithFiltersDto,
+  UpdateOwnerDto,
+} from './dto/owners.dto';
 import { OwnerResponseDto } from './dto/owners.response.dto';
 
 @Injectable()
 export class OwnersService {
   constructor(private prisma: PrismaService) {}
 
-  async createOwner(createOwnerDto: CreateOwnerDto): Promise<OwnerResponseDto>  {
+  async createOwner(createOwnerDto: CreateOwnerDto): Promise<OwnerResponseDto> {
     if (!/^\d{11}$/.test(createOwnerDto.pesel)) {
       throw new BadRequestException(
         'Niepoprawny format peselu. Musi składać się z 11 znaków',
@@ -69,8 +73,30 @@ export class OwnersService {
     };
   }
 
-  async getAllOwners(): Promise<OwnerResponseDto[]> {
-    return await this.prisma.owner.findMany();
+  async getOwners(
+    params: GetOwnersWithFiltersDto,
+  ): Promise<OwnerResponseDto[]> {
+    return await this.prisma.owner.findMany({
+      where: {
+        AND: [
+          params.name
+            ? { name: { contains: params.name, mode: 'insensitive' } }
+            : {},
+          params.surname
+            ? { surname: { contains: params.surname, mode: 'insensitive' } }
+            : {},
+          params.pesel
+            ? { pesel: { contains: params.pesel, mode: 'insensitive' } }
+            : {},
+          params.address
+            ? { address: { contains: params.address, mode: 'insensitive' } }
+            : {},
+          params.id_number
+            ? { id_number: { contains: params.id_number, mode: 'insensitive' } }
+            : {},
+        ],
+      },
+    });
   }
 
   async getOwner(id: number): Promise<OwnerResponseDto> {

@@ -55,6 +55,15 @@ export class GetAllVehiclesWithFiltersDto {
 
   @ApiProperty({ required: false })
   vin?: string;
+
+  @ApiProperty({
+    required: false,
+    enum: ['DISMANTLED', 'RECEIVED_FOR_DISMANTLING'],
+  })
+  vehicle_status?: 'DISMANTLED' | 'RECEIVED_FOR_DISMANTLING';
+
+  @ApiProperty({ required: false })
+  owner_pesel?: string;
 }
 
 export class GetFilterInfoDto {
