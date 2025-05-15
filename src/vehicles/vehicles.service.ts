@@ -9,6 +9,7 @@ import {
   GetAllVehiclesWithFiltersDto,
   GetFilterInfoDto,
 } from './dto/vehicles.dto';
+import { VehicleStatus } from '@prisma/client';
 
 @Injectable()
 export class VehiclesService {
@@ -183,5 +184,31 @@ export class VehiclesService {
       brands: brands.map((b) => b.brand),
       models: models.map((m) => m.model),
     };
+  }
+
+  async changeVehicleStatus(vehicleId: number, status: VehicleStatus) {
+    const vehicle = await this.prisma.vehicle.findUnique({
+      where: {
+        id: vehicleId,
+      },
+    });
+
+    if (!vehicle) {
+      throw new NotFoundException('Pojazd o podanym id nie istnieje.');
+    }
+
+    if (vehicle.status === status) {
+      throw new ConflictException('Pojazd ma już ten status.');
+    }
+
+    return await this.prisma.vehicle.update({
+      where: {
+        id: vehicleId,
+      },
+      data: {
+        status: status,
+        dismantledAt: status === 'DISMANTLED' ? new Date() : null,
+      },
+    });
   }
 }

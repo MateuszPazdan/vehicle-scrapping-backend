@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { VehicleStatus } from '@prisma/client';
 import {
   ArrayNotEmpty,
   IsNotEmpty,
@@ -6,8 +7,6 @@ import {
   IsString,
   Matches,
 } from 'class-validator';
-
-
 
 export class AddVehicleToDismantlingDto {
   @ApiProperty()
@@ -70,9 +69,9 @@ export class GetAllVehiclesWithFiltersDto {
 
   @ApiProperty({
     required: false,
-    enum: ['DISMANTLED', 'RECEIVED_FOR_DISMANTLING'],
+    enum: VehicleStatus,
   })
-  vehicle_status?: 'DISMANTLED' | 'RECEIVED_FOR_DISMANTLING';
+  vehicle_status?: VehicleStatus;
 
   @ApiProperty({ required: false })
   owner_pesel?: string;

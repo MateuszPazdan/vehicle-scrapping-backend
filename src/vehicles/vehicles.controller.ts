@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   Param,
+  Patch,
   Post,
   Query,
   UseGuards,
@@ -77,5 +78,17 @@ export class VehiclesController {
   })
   async getFilterInput(@Query() filterInfo?: GetFilterInfoDto) {
     return await this.vehiclesService.getFilterInfo(filterInfo);
+  }
+
+  @Patch('status/:id')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(200)
+  @ApiResponse({
+    status: 200,
+    description: 'Change the status of a vehicle to dismantled',
+    type: VehicleResponseDto,
+  })
+  async changeVehicleStatusToDismantled(@Param('id') id: string) {
+    return await this.vehiclesService.changeVehicleStatus(+id, 'DISMANTLED');
   }
 }
