@@ -1,4 +1,8 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
   AddVehicleToDismantlingDto,
@@ -124,6 +128,23 @@ export class VehiclesService {
         }),
       },
     });
+  }
+
+  async getVehicleById(vehicleId: number) {
+    const vehicle = await this.prisma.vehicle.findUnique({
+      where: {
+        id: vehicleId,
+      },
+      include: {
+        owners: true,
+      },
+    });
+
+    if (!vehicle) {
+      throw new NotFoundException('Pojazd o podanym id nie istnieje.');
+    }
+
+    return vehicle;
   }
 
   async getFilterInfo(filterInfo?: GetFilterInfoDto) {

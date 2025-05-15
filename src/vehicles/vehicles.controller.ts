@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  Param,
   Post,
   Query,
   UseGuards,
@@ -14,6 +15,12 @@ import {
   GetFilterInfoDto,
 } from './dto/vehicles.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { ApiResponse } from '@nestjs/swagger';
+import {
+  AvailableFiltersResponseDto,
+  VehicleResponseDto,
+  VehicleWithOwnerResponseDto,
+} from './dto/vehicle.response.dto';
 
 @Controller('vehicles')
 export class VehiclesController {
@@ -22,6 +29,11 @@ export class VehiclesController {
   @Post()
   @HttpCode(201)
   @UseGuards(JwtAuthGuard)
+  @ApiResponse({
+    status: 201,
+    description: 'Return a new vehicle',
+    type: VehicleResponseDto,
+  })
   async addVehicleToDismantling(
     @Body() addVehicleToDismantlingDto: AddVehicleToDismantlingDto,
   ) {
@@ -32,6 +44,12 @@ export class VehiclesController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'Return a list of vehicles with filters',
+    isArray: true,
+    type: VehicleResponseDto,
+  })
   async getAllVehiclesWithFilters(
     @Query()
     params: GetAllVehiclesWithFiltersDto,
@@ -39,8 +57,24 @@ export class VehiclesController {
     return await this.vehiclesService.getAllVehiclesWithFilters(params);
   }
 
+  @Get('details/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'Return a single vehicle by id with owners',
+    type: VehicleWithOwnerResponseDto,
+  })
+  async getVehicleById(@Param('id') id: string) {
+    return await this.vehiclesService.getVehicleById(+id);
+  }
+
   @Get('filter_input')
   @UseGuards(JwtAuthGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'Return available models and brands',
+    type: AvailableFiltersResponseDto,
+  })
   async getFilterInput(@Query() filterInfo?: GetFilterInfoDto) {
     return await this.vehiclesService.getFilterInfo(filterInfo);
   }
