@@ -8,10 +8,13 @@ import { VehiclesModule } from './vehicles/vehicles.module';
 import { WastesController } from './wastes/wastes.controller';
 import { WastesService } from './wastes/wastes.service';
 import { WastesModule } from './wastes/wastes.module';
+import { StoragesController } from './storages/storages.controller';
+import { StoragesService } from './storages/storages.service';
+import { StoragesModule } from './storages/storages.module';
 
 @Module({
-  imports: [AuthModule, PrismaModule, UsersModule, OwnersModule, VehiclesModule, WastesModule],
-  controllers: [OwnersController, WastesController],
-  providers: [WastesService],
+  imports: [AuthModule, PrismaModule, UsersModule, OwnersModule, VehiclesModule, WastesModule, StoragesModule],
+  controllers: [OwnersController, WastesController, StoragesController],
+  providers: [WastesService, StoragesService],
 })
 export class AppModule {}
