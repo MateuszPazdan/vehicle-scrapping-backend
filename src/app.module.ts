@@ -11,10 +11,13 @@ import { WastesModule } from './wastes/wastes.module';
 import { StoragesController } from './storages/storages.controller';
 import { StoragesService } from './storages/storages.service';
 import { StoragesModule } from './storages/storages.module';
+import { TransactionsController } from './transactions/transactions.controller';
+import { TransactionsService } from './transactions/transactions.service';
+import { TransactionsModule } from './transactions/transactions.module';
 
 @Module({
-  imports: [AuthModule, PrismaModule, UsersModule, OwnersModule, VehiclesModule, WastesModule, StoragesModule],
-  controllers: [OwnersController, WastesController, StoragesController],
-  providers: [WastesService, StoragesService],
+  imports: [AuthModule, PrismaModule, UsersModule, OwnersModule, VehiclesModule, WastesModule, StoragesModule, TransactionsModule],
+  controllers: [OwnersController, WastesController, StoragesController, TransactionsController],
+  providers: [WastesService, StoragesService, TransactionsService],
 })
 export class AppModule {}

@@ -12,3 +12,12 @@ export class CreateWasteDto {
   @IsNotEmpty()
   pricePerKg: number;
 }
+
+export class AssignWasteEntryDto {
+  @ApiProperty()
+  vehicleId: number;
+  @ApiProperty()
+  wasteTypeId: number;
+  @ApiProperty()
+  weight: number;
+}

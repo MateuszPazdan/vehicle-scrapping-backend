@@ -58,6 +58,9 @@ export class StoragesService {
       omit: {
         wasteTypeId: true,
       },
+      orderBy: {
+        locationNr: 'asc',
+      },
     });
   }
 

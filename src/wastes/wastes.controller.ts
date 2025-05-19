@@ -9,7 +9,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { WastesService } from './wastes.service';
-import { CreateWasteDto } from './dto/wastes.dto';
+import { AssignWasteEntryDto, CreateWasteDto } from './dto/wastes.dto';
 import { ApiResponse } from '@nestjs/swagger';
 import { WasteResponseDto } from './dto/wastes.response.dto';
 
@@ -17,7 +17,7 @@ import { WasteResponseDto } from './dto/wastes.response.dto';
 export class WastesController {
   constructor(private readonly wasteService: WastesService) {}
 
-  @Post()
+  @Post('/type')
   @HttpCode(201)
   @ApiResponse({
     status: 201,
@@ -28,7 +28,7 @@ export class WastesController {
     return await this.wasteService.createWaste(createWasteDto);
   }
 
-  @Get()
+  @Get('/type')
   @ApiResponse({
     status: 200,
     description: 'Return a list of all waste types',
@@ -39,7 +39,7 @@ export class WastesController {
     return await this.wasteService.getAllWastes();
   }
 
-  @Delete(':id')
+  @Delete('/type/:id')
   @HttpCode(200)
   @ApiResponse({
     status: 200,
@@ -50,7 +50,7 @@ export class WastesController {
     return await this.wasteService.deleteWaste(+id);
   }
 
-  @Patch(':id')
+  @Patch('/type/:id')
   @HttpCode(200)
   @ApiResponse({
     status: 200,
@@ -62,5 +62,25 @@ export class WastesController {
     @Body() updateWasteDto: CreateWasteDto,
   ) {
     return await this.wasteService.updateWaste(+id, updateWasteDto);
+  }
+
+  @Post('/entry')
+  @HttpCode(201)
+  @ApiResponse({
+    status: 201,
+    description: 'Assign a waste entry to a waste type and return the result',
+  })
+  async assignWasteEntry(@Body() assignWasteEntryDto: AssignWasteEntryDto) {
+    return await this.wasteService.assignWasteEntry(assignWasteEntryDto);
+  }
+
+  @Get('/entry/:id')
+  @HttpCode(200)
+  @ApiResponse({
+    status: 200,
+    description: 'Return a list of waste entries, filtered by car ID',
+  })
+  async getWasteEntriesByCarId(@Param('id') id: string) {
+    return await this.wasteService.getWasteEntriesByVehicleId(+id);
   }
 }
