@@ -6,11 +6,13 @@ import {
   Param,
   Patch,
   Post,
+  Res,
 } from '@nestjs/common';
 import { StoragesService } from './storages.service';
 import { ApiResponse } from '@nestjs/swagger';
 import { StorageResponseDto } from './dto/storage.respnse.dto';
 import { CreateStorageDto, UpdateStorageDto } from './dto/storage.dto';
+import { Response } from 'express';
 
 @Controller('storages')
 export class StoragesController {
@@ -50,5 +52,18 @@ export class StoragesController {
     @Body() updateStorageDto: UpdateStorageDto,
   ) {
     return await this.storageService.updateStorage(+id, updateStorageDto);
+  }
+
+  @Get('status')
+  async getStorageStatusPdf(@Res() res: Response) {
+    const pdfBuffer = await this.storageService.generateReportStorageStatus();
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'attachment; filename="storage-status.pdf"',
+      'Content-Length': pdfBuffer.length,
+    });
+
+    res.end(pdfBuffer);
   }
 }

@@ -1,6 +1,9 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateStorageDto, UpdateStorageDto } from './dto/storage.dto';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as fs from 'fs';
 
 @Injectable()
 export class StoragesService {
@@ -103,5 +106,72 @@ export class StoragesService {
         wasteTypeId: true,
       },
     });
+  }
+
+  async generateReportStorageStatus() {
+    const storages = await this.prisma.storageLocation.findMany({
+      include: {
+        wasteType: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      omit: {
+        wasteTypeId: true,
+      },
+      orderBy: {
+        locationNr: 'asc',
+      },
+    });
+
+    const dataForReport = storages?.map((storage) => {
+      return [
+        String(storage.locationNr),
+        String(storage.wasteType?.name || ''),
+        String(storage.currentMass),
+      ];
+    });
+
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString('pl-PL');
+    const formattedTime = now.toLocaleTimeString('pl-PL', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+    const doc = new jsPDF();
+    const fontBase64 = fs.readFileSync(
+      './src/assets/Lato-Regular.ttf',
+      'base64',
+    );
+
+    doc.addFileToVFS('Lato-Regular', fontBase64);
+    doc.addFont('Lato-Regular', 'Lato', 'normal');
+    doc.setFont('Lato', 'normal');
+
+    doc.setFontSize(18);
+    doc.text('Stan magazynowy', 14, 20);
+
+    doc.setFontSize(11);
+    doc.text(`Data wystawienia: ${formattedDate}, ${formattedTime}`, 14, 28);
+
+    autoTable(doc, {
+      startY: 34,
+      head: [['Nr Lokalizacji', 'Rodzaj Odpadu', 'Masa [kg]']],
+      body: dataForReport,
+      styles: {
+        font: 'Lato',
+        fontSize: 10,
+      },
+      headStyles: {
+        fillColor: [82, 183, 136],
+        textColor: [255, 255, 255],
+      },
+    });
+
+    const pdfBuffer = doc.output('arraybuffer');
+    return Buffer.from(pdfBuffer);
   }
 }
