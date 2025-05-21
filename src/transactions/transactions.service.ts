@@ -83,7 +83,7 @@ export class TransactionsService {
         wasteTypeId: true,
       },
       orderBy: {
-        transactionDate: 'asc',
+        transactionDate: 'desc',
       },
     });
   }
