@@ -18,6 +18,7 @@ import * as ms from 'ms';
 import { StringValue } from 'ms';
 import { JwtAuthGuard } from './guards/jwt-auth/jwt-auth.guard';
 import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -34,7 +35,11 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(LocalAuthGuard)
   @Post('/login')
-  async login(@Request() req, @Res({ passthrough: true }) res: Response) {
+  async login(
+    @Body() dto: LoginDto,
+    @Request() req,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const { token, refreshToken } = await this.authService.login(
       req.user.id as number,
     );
