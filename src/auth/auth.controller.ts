@@ -27,8 +27,8 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(LocalAuthGuard)
   @Post('/login')
-  login(@Request() req, @Res({ passthrough: true }) res: Response) {
-    const { token, refreshToken } = this.authService.login(
+  async login(@Request() req, @Res({ passthrough: true }) res: Response) {
+    const { token, refreshToken } = await this.authService.login(
       req.user.id as number,
     );
 
@@ -51,8 +51,10 @@ export class AuthController {
 
   @UseGuards(RefreshAuthGuard)
   @Post('/refresh')
-  refreshToken(@Req() req, @Res({ passthrough: true }) res: Response) {
-    const { token } = this.authService.refreshToken(req.user.id as number);
+  async refreshToken(@Req() req, @Res({ passthrough: true }) res: Response) {
+    const { token } = await this.authService.refreshToken(
+      req.user.id as number,
+    );
 
     res.cookie('access_token', token, {
       httpOnly: true,
@@ -67,5 +69,17 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   verifyToken() {
     return this.authService.verifyToken();
+  }
+
+  @Post('/logout')
+  @UseGuards(JwtAuthGuard)
+  logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('access_token');
+    res.clearCookie('refresh_token');
+  }
+
+  @Post('/add-roles')
+  addRoles() {
+    this.authService.addRoles();
   }
 }

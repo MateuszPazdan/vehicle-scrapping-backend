@@ -5,12 +5,14 @@ import { UsersService } from 'src/users/users.service';
 import { AuthJwtPayload } from './types/auth-jwtPayload';
 import refreshJwtConfig from './config/refresh-jwt.config';
 import { ConfigType } from '@nestjs/config';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private userService: UsersService,
     private jwtService: JwtService,
+    private prisma: PrismaService,
     @Inject(refreshJwtConfig.KEY)
     private refreshTokenConfig: ConfigType<typeof refreshJwtConfig>,
   ) {}
@@ -26,13 +28,26 @@ export class AuthService {
     }
   }
 
-  login(userId: number) {
-    const payload: AuthJwtPayload = { sub: userId };
+  async login(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { roles: true },
+    });
+
+    if (!user) throw new UnauthorizedException();
+
+    const payload: AuthJwtPayload = {
+      sub: user.id,
+      roles: user.roles.map((r) => r.name),
+    };
+
     const token = this.jwtService.sign(payload);
+
     const refreshToken = this.jwtService.sign(payload, {
       secret: this.refreshTokenConfig.secret,
       expiresIn: this.refreshTokenConfig.expiresIn,
     });
+
     return {
       id: userId,
       token,
@@ -40,9 +55,21 @@ export class AuthService {
     };
   }
 
-  refreshToken(userId: number) {
-    const payload: AuthJwtPayload = { sub: userId };
+  async refreshToken(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { roles: true },
+    });
+
+    if (!user) throw new UnauthorizedException();
+
+    const payload: AuthJwtPayload = {
+      sub: user.id,
+      roles: user.roles.map((r) => r.name),
+    };
+
     const token = this.jwtService.sign(payload);
+
     return {
       id: userId,
       token,
@@ -51,5 +78,19 @@ export class AuthService {
 
   verifyToken() {
     return true;
+  }
+
+  async addRoles() {
+    await this.prisma.role.create({
+      data: { name: 'ADMIN' },
+    });
+
+    await this.prisma.role.create({
+      data: { name: 'EMPLOYEE' },
+    });
+
+    await this.prisma.role.create({
+      data: { name: 'WORKER' },
+    });
   }
 }
