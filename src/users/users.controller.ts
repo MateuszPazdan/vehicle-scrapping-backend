@@ -10,7 +10,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([Role.ADMIN, Role.USER])
+  @Roles([Role.USER])
   @Get('/me')
   getProfile(@Req() req) {
     return this.usersService.getUser({
