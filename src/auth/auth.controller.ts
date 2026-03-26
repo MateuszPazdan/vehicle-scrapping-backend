@@ -1,78 +1,71 @@
 import {
-  Body,
   Controller,
   HttpCode,
   HttpStatus,
   Post,
+  Req,
+  Request,
   Res,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-
-import { AuthGuard } from '@nestjs/passport';
-import { AuthDto, LoginDto } from './dto/auth.dto';
-import { LocalAuthGuard } from './guards/local-auth.guard';
-import { User } from '@prisma/client';
+import { LocalAuthGuard } from './guards/local-auth/local-auth.guard';
+import { RefreshAuthGuard } from './guards/refresh-auth/refresh-auth.guard';
 import { Response } from 'express';
-import { CurrentUser } from './current-user.decorator';
-import { ApiResponse } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
+import * as ms from 'ms';
+import { StringValue } from 'ms';
+import { JwtAuthGuard } from './guards/jwt-auth/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {}
 
-  @Post('/register')
-  @HttpCode(HttpStatus.CREATED)
-  @ApiResponse({
-    status: HttpStatus.CREATED,
-    description: 'User successfully registered.',
-  })
-  async register(@Body() dto: AuthDto) {
-    return this.authService.register(dto);
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(LocalAuthGuard)
+  @Post('/login')
+  login(@Request() req, @Res({ passthrough: true }) res: Response) {
+    const { token, refreshToken } = this.authService.login(
+      req.user.id as number,
+    );
+
+    res.cookie('access_token', token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      maxAge: ms(this.configService.get('JWT_EXPIRE_IN') as StringValue),
+    });
+
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      maxAge: ms(
+        this.configService.get('REFRESH_JWT_EXPIRE_IN') as StringValue,
+      ),
+    });
   }
 
-  @Post('/login')
-  @UseGuards(LocalAuthGuard)
-  @HttpCode(HttpStatus.OK)
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'User successfully logged in.',
-  })
-  @ApiResponse({
-    status: HttpStatus.UNAUTHORIZED,
-    description: 'Invalid credentials.',
-  })
-  login(
-    @Body() dto: LoginDto,
-    @CurrentUser() user: User,
-    @Res({ passthrough: true }) response: Response,
-  ) {
-    this.authService.login(user, response);
+  @UseGuards(RefreshAuthGuard)
+  @Post('/refresh')
+  refreshToken(@Req() req, @Res({ passthrough: true }) res: Response) {
+    const { token } = this.authService.refreshToken(req.user.id as number);
+
+    res.cookie('access_token', token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      maxAge: ms(this.configService.get('JWT_EXPIRE_IN') as StringValue),
+    });
   }
 
   @Post('/verify')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'JWT token successfully verified.',
-  })
-  @ApiResponse({
-    status: HttpStatus.FORBIDDEN,
-    description: 'Unauthorized access, invalid or expired token.',
-  })
   verifyToken() {
-    this.authService.verifyToken();
-  }
-
-  @UseGuards(AuthGuard('jwt'))
-  @Post('/logout')
-  @HttpCode(HttpStatus.OK)
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'User successfully logged out.',
-  })
-  logout(@Res({ passthrough: true }) response: Response) {
-    this.authService.logout(response);
+    return this.authService.verifyToken();
   }
 }

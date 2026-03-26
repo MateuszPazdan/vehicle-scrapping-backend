@@ -15,13 +15,13 @@ import {
   GetAllVehiclesWithFiltersDto,
   GetFilterInfoDto,
 } from './dto/vehicles.dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ApiResponse } from '@nestjs/swagger';
 import {
   AvailableFiltersResponseDto,
   VehicleResponseDto,
   VehicleWithOwnerResponseDto,
 } from './dto/vehicle.response.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
 
 @Controller('vehicles')
 export class VehiclesController {

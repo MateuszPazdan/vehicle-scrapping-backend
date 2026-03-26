@@ -1,81 +1,55 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
-import * as bcrypt from 'bcrypt';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Response } from 'express';
-import { AuthDto } from './dto/auth.dto';
+import { compare } from 'bcrypt';
 import { UsersService } from 'src/users/users.service';
-import { ConfigService } from '@nestjs/config';
-import { User } from '@prisma/client';
-import { TokenPayload } from './token-payload.interface';
+import { AuthJwtPayload } from './types/auth-jwtPayload';
+import refreshJwtConfig from './config/refresh-jwt.config';
+import { ConfigType } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userService: UsersService,
-    private readonly prisma: PrismaService,
-    private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
+    private userService: UsersService,
+    private jwtService: JwtService,
+    @Inject(refreshJwtConfig.KEY)
+    private refreshTokenConfig: ConfigType<typeof refreshJwtConfig>,
   ) {}
 
-  async verifyUser(email: string, password: string) {
+  async validateUser(email: string, password: string) {
     try {
-      const user = await this.userService.getUser({ email });
-      const authenticated = await bcrypt.compare(password, user.hashedPassword);
+      const user = await this.userService.findUser(email);
+      const authenticated = await compare(password, user.hashedPassword);
       if (!authenticated) throw new UnauthorizedException();
-      return user;
+      return { id: user.id };
     } catch {
       throw new UnauthorizedException('Niepoprawne dane uwierzytelniające');
     }
   }
 
-  hashData(data: string) {
-    return bcrypt.hash(data, 10);
-  }
-
-  async register(dto: AuthDto) {
-    if (dto.adminKey !== process.env.ADMIN_KEY)
-      throw new UnauthorizedException();
-    const hashedPassword = await this.hashData(dto.password);
-    await this.prisma.user.create({
-      data: {
-        email: dto.email,
-        hashedPassword: hashedPassword,
-        isAdmin: dto.adminKey === process.env.ADMIN_KEY,
-      },
+  login(userId: number) {
+    const payload: AuthJwtPayload = { sub: userId };
+    const token = this.jwtService.sign(payload);
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: this.refreshTokenConfig.secret,
+      expiresIn: this.refreshTokenConfig.expiresIn,
     });
-  }
-
-  login(user: User, response: Response) {
-    const expirationMs = parseInt(
-      this.configService.getOrThrow<string>('JWT_ACCESS_TOKEN_EXPIRATION_MS'),
-    );
-    const expiresAccessToken = new Date();
-    expiresAccessToken.setTime(expiresAccessToken.getTime() + expirationMs);
-
-    const tokenPayload: TokenPayload = {
-      userId: user.id.toString(),
+    return {
+      id: userId,
+      token,
+      refreshToken,
     };
-    const accessToken = this.jwtService.sign(tokenPayload, {
-      secret: this.configService.getOrThrow('JWT_ACCESS_TOKEN_SECRET'),
-      expiresIn: `${expirationMs}ms`,
-    });
+  }
 
-    response.cookie('Authentication', accessToken, {
-      httpOnly: true,
-      secure: this.configService.get('NODE_ENV') === 'production',
-      expires: expiresAccessToken,
-    });
+  refreshToken(userId: number) {
+    const payload: AuthJwtPayload = { sub: userId };
+    const token = this.jwtService.sign(payload);
+    return {
+      id: userId,
+      token,
+    };
   }
 
   verifyToken() {
     return true;
-  }
-
-  logout(response: Response) {
-    response.clearCookie('Authentication', {
-      httpOnly: true,
-      secure: this.configService.get('NODE_ENV') === 'production',
-    });
   }
 }

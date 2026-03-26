@@ -9,10 +9,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { OwnersService } from './owners.service';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreateOwnerDto, GetOwnersWithFiltersDto } from './dto/owners.dto';
 import { OwnerResponseDto } from './dto/owners.response.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
 
 @ApiTags('owners')
 @Controller('owners')
