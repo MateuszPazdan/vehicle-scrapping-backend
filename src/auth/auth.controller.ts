@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   HttpCode,
   HttpStatus,
@@ -16,6 +17,7 @@ import { ConfigService } from '@nestjs/config';
 import * as ms from 'ms';
 import { StringValue } from 'ms';
 import { JwtAuthGuard } from './guards/jwt-auth/jwt-auth.guard';
+import { RegisterDto } from './dto/register.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -23,6 +25,11 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
   ) {}
+
+  @Post('/register')
+  async register(@Body() dto: RegisterDto) {
+    return this.authService.register(dto.email, dto.password);
+  }
 
   @HttpCode(HttpStatus.OK)
   @UseGuards(LocalAuthGuard)
@@ -76,10 +83,5 @@ export class AuthController {
   logout(@Res({ passthrough: true }) res: Response) {
     res.clearCookie('access_token');
     res.clearCookie('refresh_token');
-  }
-
-  @Post('/add-roles')
-  addRoles() {
-    this.authService.addRoles();
   }
 }

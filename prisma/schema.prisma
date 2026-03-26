@@ -23,14 +23,7 @@ model User {
   updatedAt      DateTime @updatedAt
   email          String   @unique
   hashedPassword String
-  roles          Role[]   @relation("UserRoles") 
-}
-
-model Role {
-  id    Int    @id @default(autoincrement())
-  name  String @unique
-
-  users User[] @relation("UserRoles")
+  roles          Role[]
 }
 
 model Owner {
@@ -115,4 +108,10 @@ model StorageLocation {
 enum VehicleStatus {
   DISMANTLED
   RECEIVED_FOR_DISMANTLING
+}
+
+enum Role {
+  ADMIN
+  EMPLOYEE
+  USER
 }

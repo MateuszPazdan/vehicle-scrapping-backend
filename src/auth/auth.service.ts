@@ -6,6 +6,7 @@ import { AuthJwtPayload } from './types/auth-jwtPayload';
 import refreshJwtConfig from './config/refresh-jwt.config';
 import { ConfigType } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { hash } from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +17,28 @@ export class AuthService {
     @Inject(refreshJwtConfig.KEY)
     private refreshTokenConfig: ConfigType<typeof refreshJwtConfig>,
   ) {}
+
+  async register(email: string, password: string) {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      throw new UnauthorizedException('User already exists');
+    }
+
+    const hashedPassword = await hash(password, 10);
+
+    const user = await this.prisma.user.create({
+      data: {
+        email,
+        hashedPassword,
+        roles: ['USER'],
+      },
+    });
+
+    return { id: user.id };
+  }
 
   async validateUser(email: string, password: string) {
     try {
@@ -31,14 +54,13 @@ export class AuthService {
   async login(userId: number) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      include: { roles: true },
     });
 
     if (!user) throw new UnauthorizedException();
 
     const payload: AuthJwtPayload = {
       sub: user.id,
-      roles: user.roles.map((r) => r.name),
+      roles: user.roles,
     };
 
     const token = this.jwtService.sign(payload);
@@ -58,14 +80,13 @@ export class AuthService {
   async refreshToken(userId: number) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      include: { roles: true },
     });
 
     if (!user) throw new UnauthorizedException();
 
     const payload: AuthJwtPayload = {
       sub: user.id,
-      roles: user.roles.map((r) => r.name),
+      roles: user.roles,
     };
 
     const token = this.jwtService.sign(payload);
@@ -78,19 +99,5 @@ export class AuthService {
 
   verifyToken() {
     return true;
-  }
-
-  async addRoles() {
-    await this.prisma.role.create({
-      data: { name: 'ADMIN' },
-    });
-
-    await this.prisma.role.create({
-      data: { name: 'EMPLOYEE' },
-    });
-
-    await this.prisma.role.create({
-      data: { name: 'WORKER' },
-    });
   }
 }
