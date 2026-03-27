@@ -19,12 +19,14 @@ import { StringValue } from 'ms';
 import { JwtAuthGuard } from './guards/jwt-auth/jwt-auth.guard';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
+    private readonly prisma: PrismaService,
   ) {}
 
   @Post('/register')
@@ -43,6 +45,9 @@ export class AuthController {
     const { token, refreshToken } = await this.authService.login(
       req.user.id as number,
     );
+    const user = await this.prisma.user.findUnique({
+      where: { id: req.user.id },
+    });
 
     res.cookie('access_token', token, {
       httpOnly: true,
@@ -59,6 +64,8 @@ export class AuthController {
         this.configService.get('REFRESH_JWT_EXPIRE_IN') as StringValue,
       ),
     });
+
+    return { roles: user?.roles };
   }
 
   @UseGuards(RefreshAuthGuard)
@@ -67,6 +74,14 @@ export class AuthController {
     const { token } = await this.authService.refreshToken(
       req.user.id as number,
     );
+    const user = await this.prisma.user.findUnique({
+      where: { id: req.user.id },
+    });
+
+    if (!user) {
+      res.clearCookie('access_token');
+      res.clearCookie('refresh_token');
+    }
 
     res.cookie('access_token', token, {
       httpOnly: true,
@@ -74,13 +89,19 @@ export class AuthController {
       sameSite: 'strict',
       maxAge: ms(this.configService.get('JWT_EXPIRE_IN') as StringValue),
     });
+
+    return { roles: user?.roles };
   }
 
   @Post('/verify')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  verifyToken() {
-    return this.authService.verifyToken();
+  async verifyToken(@Req() req) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: req.user.id },
+    });
+
+    return { roles: user?.roles };
   }
 
   @Post('/logout')

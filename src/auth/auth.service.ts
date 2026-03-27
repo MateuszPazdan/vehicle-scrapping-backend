@@ -96,8 +96,4 @@ export class AuthService {
       token,
     };
   }
-
-  verifyToken() {
-    return true;
-  }
 }
