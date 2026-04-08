@@ -14,6 +14,8 @@ import { StoragesModule } from './storages/storages.module';
 import { TransactionsController } from './transactions/transactions.controller';
 import { TransactionsService } from './transactions/transactions.service';
 import { TransactionsModule } from './transactions/transactions.module';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -25,6 +27,14 @@ import { TransactionsModule } from './transactions/transactions.module';
     WastesModule,
     StoragesModule,
     TransactionsModule,
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 60000,
+          limit: 10,
+        },
+      ],
+    }),
   ],
   controllers: [
     OwnersController,
@@ -32,6 +42,14 @@ import { TransactionsModule } from './transactions/transactions.module';
     StoragesController,
     TransactionsController,
   ],
-  providers: [WastesService, StoragesService, TransactionsService],
+  providers: [
+    WastesService,
+    StoragesService,
+    TransactionsService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}
