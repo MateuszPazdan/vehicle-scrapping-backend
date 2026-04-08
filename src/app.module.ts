@@ -16,9 +16,11 @@ import { TransactionsService } from './transactions/transactions.service';
 import { TransactionsModule } from './transactions/transactions.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { AddressModule } from './address/address.module';
 
 @Module({
   imports: [
+    AddressModule,
     AuthModule,
     PrismaModule,
     UsersModule,
@@ -35,6 +37,7 @@ import { APP_GUARD } from '@nestjs/core';
         },
       ],
     }),
+    AddressModule,
   ],
   controllers: [
     OwnersController,
