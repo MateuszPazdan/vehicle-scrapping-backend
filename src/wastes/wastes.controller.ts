@@ -7,11 +7,16 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { WastesService } from './wastes.service';
 import { AssignWasteEntryDto, CreateWasteDto } from './dto/wastes.dto';
 import { ApiResponse } from '@nestjs/swagger';
 import { WasteResponseDto } from './dto/wastes.response.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/guards/roles/roles.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { Role } from '@prisma/client';
 
 @Controller('wastes')
 export class WastesController {
@@ -19,6 +24,8 @@ export class WastesController {
 
   @Post('/type')
   @HttpCode(201)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles([Role.ADMIN])
   @ApiResponse({
     status: 201,
     description: 'Create and return a new waste type',
@@ -29,6 +36,8 @@ export class WastesController {
   }
 
   @Get('/type')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles([Role.EMPLOYEE])
   @ApiResponse({
     status: 200,
     description: 'Return a list of all waste types',
@@ -40,6 +49,8 @@ export class WastesController {
   }
 
   @Delete('/type/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles([Role.ADMIN])
   @HttpCode(200)
   @ApiResponse({
     status: 200,
@@ -51,6 +62,8 @@ export class WastesController {
   }
 
   @Patch('/type/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles([Role.ADMIN])
   @HttpCode(200)
   @ApiResponse({
     status: 200,
@@ -65,6 +78,8 @@ export class WastesController {
   }
 
   @Post('/entry')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles([Role.EMPLOYEE])
   @HttpCode(201)
   @ApiResponse({
     status: 201,
@@ -75,6 +90,8 @@ export class WastesController {
   }
 
   @Get('/entry/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles([Role.EMPLOYEE])
   @HttpCode(200)
   @ApiResponse({
     status: 200,

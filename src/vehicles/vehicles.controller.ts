@@ -22,6 +22,9 @@ import {
   VehicleWithOwnerResponseDto,
 } from './dto/vehicle.response.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/guards/roles/roles.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { Role } from '@prisma/client';
 
 @Controller('vehicles')
 export class VehiclesController {
@@ -29,7 +32,8 @@ export class VehiclesController {
 
   @Post()
   @HttpCode(201)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles([Role.EMPLOYEE])
   @ApiResponse({
     status: 201,
     description: 'Return a new vehicle',
@@ -44,7 +48,8 @@ export class VehiclesController {
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles([Role.EMPLOYEE])
   @ApiResponse({
     status: 200,
     description: 'Return a list of vehicles with filters',
@@ -59,7 +64,8 @@ export class VehiclesController {
   }
 
   @Get('details/:id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles([Role.EMPLOYEE])
   @ApiResponse({
     status: 200,
     description: 'Return a single vehicle by id with owners',
@@ -70,7 +76,8 @@ export class VehiclesController {
   }
 
   @Get('filter_input')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles([Role.EMPLOYEE])
   @ApiResponse({
     status: 200,
     description: 'Return available models and brands',
@@ -81,7 +88,8 @@ export class VehiclesController {
   }
 
   @Patch('status/:id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles([Role.EMPLOYEE])
   @HttpCode(200)
   @ApiResponse({
     status: 200,
