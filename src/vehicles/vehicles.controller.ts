@@ -18,6 +18,7 @@ import {
 import { ApiResponse } from '@nestjs/swagger';
 import {
   AvailableFiltersResponseDto,
+  AvailableVehicleResponseDto,
   VehicleResponseDto,
   VehicleWithOwnerResponseDto,
 } from './dto/vehicle.response.dto';
@@ -98,5 +99,16 @@ export class VehiclesController {
   })
   async changeVehicleStatusToDismantled(@Param('id') id: string) {
     return await this.vehiclesService.changeVehicleStatus(+id, 'DISMANTLED');
+  }
+
+  @Get('/available')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles([Role.USER])
+  @ApiResponse({
+    description: 'Return all available and not dismatled cars',
+    type: AvailableVehicleResponseDto,
+  })
+  async getAvailableVehicles() {
+    return await this.vehiclesService.getAllAvailableVehicles();
   }
 }

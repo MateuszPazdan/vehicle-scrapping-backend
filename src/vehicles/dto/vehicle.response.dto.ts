@@ -51,3 +51,17 @@ export class AvailableFiltersResponseDto {
   @ApiProperty()
   models: string[];
 }
+
+export class AvailableVehicleResponseDto {
+  @ApiProperty()
+  id: number;
+
+  @ApiProperty()
+  brand: string;
+
+  @ApiProperty()
+  model: string;
+
+  @ApiProperty()
+  year_of_production: number;
+}

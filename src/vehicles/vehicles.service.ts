@@ -211,4 +211,24 @@ export class VehiclesService {
       },
     });
   }
+
+  async getAllAvailableVehicles() {
+    const vehicles = await this.prisma.vehicle.findMany({
+      where: {
+        status: 'RECEIVED_FOR_DISMANTLING',
+      },
+      select: {
+        id: true,
+        brand: true,
+        model: true,
+        year_of_production: true,
+      },
+    });
+
+    if (!vehicles) {
+      throw new NotFoundException('Brak dostępnych pojazdów.');
+    }
+
+    return vehicles;
+  }
 }
