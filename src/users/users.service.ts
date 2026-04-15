@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, Role } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -27,7 +27,26 @@ export class UsersService {
     return user;
   }
 
-  async getUsers() {
-    return this.prisma.user.findMany();
+  async getAllUsers() {
+    return this.prisma.user.findMany({
+      omit: {
+        hashedPassword: true,
+      },
+    });
+  }
+
+  async updateUser(id: number, roles: Role[]) {
+    const user = await this.prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        roles,
+      },
+      omit: {
+        hashedPassword: true,
+      },
+    });
+    if (!user) throw new NotFoundException('Użytkownik nieznaleziony');
   }
 }
