@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, Matches } from 'class-validator';
 
 export class CreateOwnerDto {
   @ApiProperty()
@@ -15,6 +15,9 @@ export class CreateOwnerDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
+  @Matches(/^\d{11}$/, {
+    message: 'PESEL musi zawierać dokładnie 11 cyfr',
+  })
   pesel: string;
 
   @ApiProperty()
@@ -25,6 +28,9 @@ export class CreateOwnerDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
+  @Matches(/^[A-Z]{3}[0-9]{6}$/, {
+    message: 'Numer dowodu musi mieć format: 3 wielkie litery i 6 cyfr',
+  })
   id_number: string;
 }
 
