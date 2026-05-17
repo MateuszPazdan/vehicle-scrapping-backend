@@ -24,7 +24,7 @@ export class AuthService {
     });
 
     if (existingUser) {
-      throw new UnauthorizedException('User already exists');
+      throw new UnauthorizedException('Wystąpił błąd podczas rejestracji');
     }
 
     const hashedPassword = await hash(password, 10);
